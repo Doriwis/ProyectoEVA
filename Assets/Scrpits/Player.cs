@@ -13,8 +13,8 @@ public class Player : MonoBehaviour
     [SerializeField] float velocityMovimiento;
     [SerializeField] float velocidadMaxima;
     Vector3 ajuste;
-    float h;
-    float v;
+    [SerializeField] float h;
+    [SerializeField] float v;
    [SerializeField] float daño;
 
     [Header("Correción de las rampas")]
@@ -28,6 +28,8 @@ public class Player : MonoBehaviour
     [SerializeField]float distSuelo;
     [Header("ANIMACION")]
     Animator anim;
+    private enum estado { IDEL,run, caer,saltar,saltar2 ,dead};
+    private estado estadoPaleyer=estado.IDEL;
     // Start is called before the first frame update
     void Start()
     {
@@ -41,8 +43,8 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        h = Input.GetAxis("Horizontal");
-        v = Input.GetAxis("Vertical");
+        h = Input.GetAxisRaw("Horizontal");
+        v = Input.GetAxisRaw("Vertical");
 
         ItsGrounded();
         Saltar();
@@ -68,7 +70,7 @@ public class Player : MonoBehaviour
         Debug.DrawRay(transform.position, Vector2.down*distSuelo, Color.red);
         if (cesta)
         {
-            
+            saltosRes = saltosMax;
             Debug.Log("estoy en el suelo ");
             return true;
             
@@ -127,30 +129,48 @@ public class Player : MonoBehaviour
 
             if (saltosRes > 1 && ItsGrounded() == true)
             {
-                Debug.Log(" suelo    2");
+                estadoPaleyer = estado.saltar;
 
                 rb.velocity = new Vector2(rb.velocity.x, 0);
 
                 rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
-            }
-            else if (saltosRes > 1 && ItsGrounded() == false)
-            {
-                Debug.Log("No suelo    2");
-
-                rb.velocity = new Vector2(rb.velocity.x, 0);
-                rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
-
-                saltosRes--;
             }
             else
             {
-                Debug.Log("No suelo     1");
+                estadoPaleyer = estado.saltar2;
+                
 
                 rb.velocity = new Vector2(rb.velocity.x, 0);
                 rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
 
                 saltosRes--;
             }
+        }
+    }
+    void Animaciones()
+    {
+        switch (estadoPaleyer)
+        {
+            case estado.IDEL:
+                Debug.Log("ESTYO QUIETO");
+                break;
+            case estado.run:
+                Debug.Log("ESTYO CORRIENDO");
+                break;
+            case estado.caer:
+                Debug.Log("ESTYO CAYENDO");
+                break;
+            case estado.saltar:
+                Debug.Log("ESTYO SALTANDO");
+                break;
+            case estado.saltar2:
+                Debug.Log("ESTYO SALTANDO X2");
+                break;
+            case estado.dead:
+                Debug.Log("ESTYO MUERTO");
+                break;
+            default:
+                break;
         }
     }
 
