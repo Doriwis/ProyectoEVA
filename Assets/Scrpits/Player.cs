@@ -43,11 +43,12 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        h = Input.GetAxisRaw("Horizontal");
-        v = Input.GetAxisRaw("Vertical");
+        
+
 
         ItsGrounded();
         Saltar();
+        Animacio();
     }
 
     //apica fuerzas al player
@@ -61,6 +62,21 @@ public class Player : MonoBehaviour
         }
         
     }
+    void Animacio()
+    {
+        h = Input.GetAxisRaw("Horizontal");
+        if (h > 0)
+        {
+            transform.localScale = new Vector3(1, 1, 1);
+            Debug.Log("Derecha");
+        }
+       else if (h < 0)
+        {
+            transform.localScale = new Vector3(-1, 1, 1);
+            Debug.Log("IZQUIERDA");
+        }
+
+    }
 
     //Detecta si esta en suelo
     bool ItsGrounded()
@@ -70,7 +86,11 @@ public class Player : MonoBehaviour
         Debug.DrawRay(transform.position, Vector2.down*distSuelo, Color.red);
         if (cesta)
         {
-            saltosRes = saltosMax;
+            if (rb.velocity.y<=0)
+            {
+                saltosRes = saltosMax;
+            }
+           
             Debug.Log("estoy en el suelo ");
             return true;
             
@@ -81,7 +101,7 @@ public class Player : MonoBehaviour
             Debug.Log("estoy en el aire");
                 return false;
         }
-        
+
         
     }
 
@@ -134,6 +154,8 @@ public class Player : MonoBehaviour
                 rb.velocity = new Vector2(rb.velocity.x, 0);
 
                 rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
+                saltosRes--;
+
             }
             else
             {
@@ -147,35 +169,10 @@ public class Player : MonoBehaviour
             }
         }
     }
-    void Animaciones()
-    {
-        switch (estadoPaleyer)
-        {
-            case estado.IDEL:
-                Debug.Log("ESTYO QUIETO");
-                break;
-            case estado.run:
-                Debug.Log("ESTYO CORRIENDO");
-                break;
-            case estado.caer:
-                Debug.Log("ESTYO CAYENDO");
-                break;
-            case estado.saltar:
-                Debug.Log("ESTYO SALTANDO");
-                break;
-            case estado.saltar2:
-                Debug.Log("ESTYO SALTANDO X2");
-                break;
-            case estado.dead:
-                Debug.Log("ESTYO MUERTO");
-                break;
-            default:
-                break;
-        }
-    }
+    
 
-    public void RecibierDaño()
+    public void RecibierDaño(float exterDano)
     {
-
+        vidas = -exterDano;
     }
 }
