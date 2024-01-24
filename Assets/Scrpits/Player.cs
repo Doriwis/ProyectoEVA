@@ -15,7 +15,7 @@ public class Player : MonoBehaviour
     Vector3 ajuste;
     [SerializeField] float h;
     [SerializeField] float v;
-   [SerializeField] float daño;
+    [SerializeField] float daño;
 
     [Header("Correción de las rampas")]
     float gravityInicial;
@@ -25,11 +25,14 @@ public class Player : MonoBehaviour
     [SerializeField] int saltosMax;
     [SerializeField] int saltosRes;
     [SerializeField] float forceJump;
-    [SerializeField]float distSuelo;
+    [SerializeField] float distSuelo;
     [Header("ANIMACION")]
     Animator anim;
-    private enum estado { IDEL,run, caer,saltar,saltar2 ,dead};
-    private estado estadoPaleyer=estado.IDEL;
+    private enum estado { IDEL, run, caer, saltar, saltar2, dead };
+    private estado estadoPaleyer = estado.IDEL;
+
+    // AREA DE DETECCION
+   // CADENA
     // Start is called before the first frame update
     void Start()
     {
@@ -43,7 +46,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
 
 
         ItsGrounded();
@@ -60,7 +63,7 @@ public class Player : MonoBehaviour
             ajuste = Vector3.ClampMagnitude(rb.velocity, velocidadMaxima);
             rb.velocity = new Vector3(ajuste.x, rb.velocity.y);
         }
-        
+
     }
     void Animacio()
     {
@@ -69,40 +72,61 @@ public class Player : MonoBehaviour
         {
             transform.localScale = new Vector3(1, 1, 1);
             Debug.Log("Derecha");
+
+            anim.SetBool("Runnig", true);
         }
-       else if (h < 0)
+        else if (h < 0)
         {
             transform.localScale = new Vector3(-1, 1, 1);
             Debug.Log("IZQUIERDA");
+            anim.SetBool("Runnig", true);
+        }
+        else
+        {
+            anim.SetBool("Runnig", false);
         }
 
     }
 
     //Detecta si esta en suelo
     bool ItsGrounded()
-    {   
-        
+    {
+
         RaycastHit2D cesta = Physics2D.Raycast(transform.position, Vector2.down, distSuelo, Suelo);
-        Debug.DrawRay(transform.position, Vector2.down*distSuelo, Color.red);
+        Debug.DrawRay(transform.position, Vector2.down * distSuelo, Color.red);
         if (cesta)
         {
-            if (rb.velocity.y<=0)
+            if (rb.velocity.y <= 0)
             {
+                Debug.Log("estoy en el suelo ");
                 saltosRes = saltosMax;
+                anim.SetBool("Falling", true);
+
+                anim.SetBool("Falling", false);
             }
-           
-            Debug.Log("estoy en el suelo ");
+
+            
             return true;
-            
-            
+
+
         }
         else
         {
-            Debug.Log("estoy en el aire");
-                return false;
+            
+            if (rb.velocity.y < 0)
+            {
+                Debug.Log("estoy en el aire a bajo");
+                anim.SetBool("Falling", true);
+            }
+            else
+            {
+                Debug.Log("estoy en el aire arriba");
+                anim.SetBool("Falling", false);
+            }
+            return false;
         }
 
-        
+
     }
 
     //Para que no resvale en las cuestas
@@ -151,25 +175,29 @@ public class Player : MonoBehaviour
             {
                 estadoPaleyer = estado.saltar;
 
-                rb.velocity = new Vector2(rb.velocity.x, 0);
-
-                rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
-                saltosRes--;
+                anim.SetTrigger("Jumping");
 
             }
             else
             {
                 estadoPaleyer = estado.saltar2;
-                
+
 
                 rb.velocity = new Vector2(rb.velocity.x, 0);
                 rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
 
+                anim.SetTrigger("Jumping2");
                 saltosRes--;
             }
         }
     }
-    
+
+    public void Impulso()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, 0);
+        rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
+        saltosRes--;
+    }
 
     public void RecibierDaño(float exterDano)
     {
