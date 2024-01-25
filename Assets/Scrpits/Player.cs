@@ -26,13 +26,21 @@ public class Player : MonoBehaviour
     [SerializeField] int saltosRes;
     [SerializeField] float forceJump;
     [SerializeField] float distSuelo;
+
     [Header("ANIMACION")]
     Animator anim;
-    private enum estado { IDEL, run, caer, saltar, saltar2, dead };
-    private estado estadoPaleyer = estado.IDEL;
+
+    [Header("ATAQUES")]
+
+    [Header("Gancho")]
+    [SerializeField]GameObject gancho;
+    [SerializeField] Camera camara;
+    [SerializeField] Transform spawnGanch;
+    Vector3 objetivo;
+
 
     // AREA DE DETECCION
-   // CADENA
+    // CADENA
     // Start is called before the first frame update
     void Start()
     {
@@ -173,14 +181,14 @@ public class Player : MonoBehaviour
 
             if (saltosRes > 1 && ItsGrounded() == true)
             {
-                estadoPaleyer = estado.saltar;
+               
 
                 anim.SetTrigger("Jumping");
 
             }
             else
             {
-                estadoPaleyer = estado.saltar2;
+                
 
 
                 rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -198,6 +206,22 @@ public class Player : MonoBehaviour
         rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
         saltosRes--;
     }
+
+    public void DisparoGancho()
+    {
+        if (Input.GetMouseButtonDown(1))
+        { 
+            objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
+
+            float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
+            float anguloReal = ((180 * anguloRad) / Mathf.PI)-90;
+
+            Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0, 0, anguloReal));
+
+        }
+        
+    }
+
 
     public void RecibierDaño(float exterDano)
     {
