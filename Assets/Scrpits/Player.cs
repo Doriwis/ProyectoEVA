@@ -60,6 +60,7 @@ public class Player : MonoBehaviour
         ItsGrounded();
         Saltar();
         Animacio();
+        DisparoGancho();
     }
 
     //apica fuerzas al player
@@ -214,7 +215,7 @@ public class Player : MonoBehaviour
             objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
 
             float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
-            float anguloReal = ((180 * anguloRad) / Mathf.PI)-90;
+            float anguloReal = ((180 * anguloRad) / Mathf.PI);
 
             Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0, 0, anguloReal));
 
