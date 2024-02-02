@@ -5,17 +5,31 @@ using UnityEngine;
 public class Gancho : MonoBehaviour
 {
     //clone la cadena 
-    //se mueva a frond
+
     [SerializeField]float velocy;
     bool touch=false;
-    // se pare cuando toque algo 
+    public float angulo;
+
+
+   Transform spawMano;
+    float cotaDista;
+    [SerializeField] GameObject cadeO;
 
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(Mover());
         Debug.Log("Nazco");
-        
+
+        GameObject shit = GameObject.FindGameObjectWithTag("SpawnMano");
+        Debug.Log("" + shit);
+        spawMano = shit.GetComponent<Transform>();
+
+        cotaDista = Vector3.Distance(spawMano.position, transform.position);
+
+        StartCoroutine(Mover());
+       
+
+       
         
     }
 
@@ -28,6 +42,16 @@ public class Gancho : MonoBehaviour
         {
             Debug.Log("Me muevo a alante ");
            transform.Translate(new Vector2(1, 0) * velocy * Time.deltaTime);
+            //calcular distacncia
+
+            
+
+
+            if (Vector3.Distance(spawMano.position,transform.position)>= cotaDista+0.55f)
+            {
+                GameObject.Instantiate(cadeO, spawMano.position, Quaternion.Euler(0, 0, angulo), transform);
+                cotaDista += 0.55f;
+            }
             yield return null;
         }
         while (touch)
@@ -41,6 +65,7 @@ public class Gancho : MonoBehaviour
    
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        Debug.Log("toco algo ");
         if (collision.gameObject.CompareTag("Suelo"))
         {
             Debug.Log("Toco suelo");

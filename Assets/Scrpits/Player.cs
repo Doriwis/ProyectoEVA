@@ -217,8 +217,8 @@ public class Player : MonoBehaviour
             float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
             float anguloReal = ((180 * anguloRad) / Mathf.PI);
 
-            Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0, 0, anguloReal));
-
+            GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0, 0, anguloReal));
+            newHand.GetComponent<Gancho>().angulo = anguloReal;
         }
         
     }
