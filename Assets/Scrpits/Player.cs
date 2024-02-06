@@ -8,7 +8,7 @@ public class Player : MonoBehaviour
     Rigidbody2D rb;
 
     [Header("MOVIMIENTO")]
-
+    [SerializeField]bool mov;
     [Header("Desplazameinto Simple ")]
     [SerializeField] float velocityMovimiento;
     [SerializeField] float velocidadMaxima;
@@ -33,6 +33,7 @@ public class Player : MonoBehaviour
     [Header("ATAQUES")]
 
     [Header("Gancho")]
+    [SerializeField] bool shoot;
     [SerializeField]GameObject gancho;
     [SerializeField] Camera camara;
     [SerializeField] Transform spawnGanch;
@@ -58,15 +59,19 @@ public class Player : MonoBehaviour
 
 
         ItsGrounded();
-        Saltar();
-        Animacio();
-        DisparoGancho();
+        if (mov)
+        {
+            Saltar();
+            Animacio();
+            AccionarGancho();
+        }
+        
     }
 
     //apica fuerzas al player
     private void FixedUpdate()
     {
-        if (vidas > 0)
+        if (vidas > 0 && mov)
         {
             rb.velocity = new Vector3(h * velocityMovimiento, rb.velocity.y);
             ajuste = Vector3.ClampMagnitude(rb.velocity, velocidadMaxima);
@@ -210,17 +215,33 @@ public class Player : MonoBehaviour
 
     public void DisparoGancho()
     {
-        if (Input.GetMouseButtonDown(1))
-        { 
-            objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
-
-            float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
-            float anguloReal = ((180 * anguloRad) / Mathf.PI);
-
-            GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0, 0, anguloReal));
-            newHand.GetComponent<Gancho>().angulo = anguloReal;
-        }
         
+        
+        objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
+
+        GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.identity);
+        
+        if (transform.localScale.x < 0)
+        {
+            newHand.GetComponent<Transform>().localScale = new Vector3(-1, 1, 1);
+        }
+        newHand.GetComponent<Gancho>().OrientarGancho(objetivo);
+
+
+    }
+    void AccionarGancho()
+    {
+        if (Input.GetMouseButtonDown(1) && shoot && ItsGrounded())
+        {
+            mov = false;
+            shoot = false;
+            
+            rb.bodyType = RigidbodyType2D.Kinematic;
+            rb.velocity = Vector3.zero;
+            
+            anim.SetBool("Gancho", true);
+
+        }
     }
 
 
