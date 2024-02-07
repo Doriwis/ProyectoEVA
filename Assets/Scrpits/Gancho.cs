@@ -7,34 +7,49 @@ public class Gancho : MonoBehaviour
    
 
     [Header("Movimiento")]
-   [SerializeField] bool touch=false;
-
-    [SerializeField]float velocy;
-
-    [SerializeField]float limitRadio;
-    [SerializeField]Vector2 destino;
-    float origidistan;
-   [SerializeField] float actDista;
-
+    public Vector2 destino;
     public float angulo;
+
+   [SerializeField] bool touch=false;
+    [SerializeField]float velocy;
+    [SerializeField]float limitRadio;
+
+    [Header("Area Limite ")]
+    [SerializeField] Transform area;
+    [SerializeField] Transform punto;
+
+    [Header("Limite de distancia")]
+   [SerializeField] float origidistan;
+   [SerializeField] float actDista;
+   [SerializeField] float recDistan;
+
 
     [Header("Cadena")]
    Transform spawMano;
     float cotaDista;
     [SerializeField] GameObject cadeO;
 
+
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Nazco");
-        
-        GameObject shit = GameObject.FindGameObjectWithTag("SpawnMano");
-        Debug.Log("" + shit);
-        spawMano = shit.GetComponent<Transform>();
 
+        origidistan = Vector2.Distance(transform.position, destino);
+        //spawn cadena 
+        GameObject shit = GameObject.FindGameObjectWithTag("SpawnMano");
+        spawMano = shit.GetComponent<Transform>();
         cotaDista = Vector3.Distance(spawMano.position, transform.position);
+        //areas visuales
+        //area = GameObject.FindGameObjectWithTag("RadioLimite ").GetComponent<Transform>();
+        //area.localScale = new Vector3(limitRadio, limitRadio, limitRadio);
+
+        punto = GameObject.FindGameObjectWithTag("Point").GetComponent<Transform>();
+        punto.position= destino;
 
         StartCoroutine(Mover());
+
+
        
 
        
@@ -47,9 +62,9 @@ public class Gancho : MonoBehaviour
         while (!touch)
         {
             actDista = Vector3.Distance(transform.position, destino);
-
+            recDistan = origidistan - actDista;
             Debug.Log("Me muevo a alante ");
-            if (actDista>0.3||(origidistan-actDista)<limitRadio)
+            if (actDista>0.3 && recDistan<limitRadio)
             {
                 if (transform.localScale.x > 0)
                 {
@@ -107,75 +122,7 @@ public class Gancho : MonoBehaviour
             touch = true;
         }
     }
-    public void OrientarGancho(Vector3 objetivo)
-    {
-       
-        
-        float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
-        float anguloReal = ((180 * anguloRad) / Mathf.PI);
-        float anguloClamp;
-
-        Debug.Log("ANGULO " + anguloReal);
-        if (transform.localScale.x>0)
-        {
-            Debug.Log("DERECHA");
-            if (anguloReal < 60 && anguloReal > -60)
-            {
-                Debug.Log("DENTRO ENTRE 60 Y -60");
-                anguloClamp = anguloReal;
-            }
-            else if (anguloReal > 60)
-            {
-                Debug.Log("MAYOR QUE 60");
-                anguloClamp = 60;
-            }
-            else
-            {
-                Debug.Log("MENOR QUE -60");
-                anguloClamp = -60;
-            }
-        }
-        else
-        {
-            Debug.Log("IZQUIERDA");
-            if (anguloReal < -120 && anguloReal > -180|| anguloReal >120 && anguloReal < 180)
-            {
-                Debug.Log("DENTRO ENTRE 120 Y -120");
-                if (anguloReal>0)
-                {
-                    anguloClamp = (180 - anguloReal)*-1;
-                    Debug.Log("POSITIVO Y ABSOLUTO ES " + anguloClamp);
-                }
-                else
-                {
-                    
-                    anguloClamp = 180+anguloReal;
-                    Debug.Log("NEGATVIO Y ABSOLUTO ES " + anguloClamp);
-                }
-                
-            }
-            else if (anguloReal > -120&& anguloReal<0)
-            {
-                Debug.Log("MAYOR QUE -120");
-                anguloClamp = 60;
-            }
-            else
-            {
-                Debug.Log("MENOR QUE 120");
-                anguloClamp = -60;
-            }
-
-        }
-
-        angulo = anguloClamp;
-
-        transform.rotation = Quaternion.Euler(0, 0, angulo);
-       
-        destino = objetivo;
-
-        origidistan = Vector2.Distance(transform.position, destino);
-        
-    }
+    
     public void Morir()
     {
         

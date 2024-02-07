@@ -7,6 +7,8 @@ TagManager:
   - Suelo
   - SpawnMano
   - Catch
+  - 'RadioLimite '
+  - Point
   layers:
   - Default
   - TransparentFX

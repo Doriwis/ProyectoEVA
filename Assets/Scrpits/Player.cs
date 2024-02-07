@@ -37,8 +37,8 @@ public class Player : MonoBehaviour
     [SerializeField]GameObject gancho;
     [SerializeField] Camera camara;
     [SerializeField] Transform spawnGanch;
-    Vector3 objetivo;
-
+    Vector2 objetivo;
+    float anguloRot;
 
     // AREA DE DETECCION
     // CADENA
@@ -217,21 +217,23 @@ public class Player : MonoBehaviour
     {
         
         
-        objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
+        
 
-        GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.identity);
+        GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0,0,anguloRot));
         
         if (transform.localScale.x < 0)
         {
             newHand.GetComponent<Transform>().localScale = new Vector3(-1, 1, 1);
         }
-        newHand.GetComponent<Gancho>().OrientarGancho(objetivo);
+
+        newHand.GetComponent<Gancho>().destino=objetivo;
+        newHand.GetComponent<Gancho>().angulo = anguloRot;
 
 
     }
     void AccionarGancho()
     {
-        if (Input.GetMouseButtonDown(1) && shoot && ItsGrounded())
+        if (Input.GetMouseButtonDown(1) && ValidarAngulo()&& ItsGrounded()&&shoot)
         {
             mov = false;
             shoot = false;
@@ -243,7 +245,63 @@ public class Player : MonoBehaviour
 
         }
     }
+    bool ValidarAngulo()
+    {
+        objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
 
+        float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
+        float anguloReal = ((180 * anguloRad) / Mathf.PI);
+        float anguloClamp;
+
+        Debug.Log("ANGULO " + anguloReal);
+
+        if (transform.localScale.x > 0)
+        {
+            Debug.Log("DERECHA");
+            if (anguloReal < 60 && anguloReal > -60)
+            {
+                Debug.Log("DENTRO ENTRE 60 Y -60");
+                anguloClamp = anguloReal;
+                anguloRot = anguloClamp;
+
+                return true;
+            }
+            else
+            {
+                
+                return false;
+            }
+        }
+        else
+        {
+            Debug.Log("IZQUIERDA");
+            if (anguloReal < -120 && anguloReal > -180 || anguloReal > 120 && anguloReal < 180)
+            {
+                
+                Debug.Log("DENTRO ENTRE 120 Y -120");
+                if (anguloReal > 0)
+                {
+                    anguloClamp = (180 - anguloReal) * -1;
+                    anguloRot = anguloClamp;
+                    Debug.Log("POSITIVO Y ABSOLUTO ES " + anguloClamp);
+                }
+                else
+                {
+
+                    anguloClamp = 180 + anguloReal;
+                    anguloRot = anguloClamp;
+                    Debug.Log("NEGATVIO Y ABSOLUTO ES " + anguloClamp);
+                }
+
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+            
+        }
+    }
 
     public void RecibierDaño(float exterDano)
     {
