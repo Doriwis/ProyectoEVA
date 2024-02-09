@@ -145,11 +145,12 @@ MonoBehaviour:
   destino: {x: 0, y: 0}
   angulo: 0
   touch: 0
-  velocy: 1
-  limitRadio: 1.5
-  area: {fileID: 0}
+  velocy: 10
+  limitRadio: 6
   punto: {fileID: 0}
   origidistan: 0
   actDista: 0
   recDistan: 0
+  cotaDista: 0
   cadeO: {fileID: 5325631574106906743, guid: a5b7a3633ba81ed448b472cc559ccfd9, type: 3}
+  cadenas: []

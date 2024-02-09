@@ -4,7 +4,8 @@ using UnityEngine;
 
 public class Gancho : MonoBehaviour
 {
-   
+
+    public  Player scriP;
 
     [Header("Movimiento")]
     public Vector2 destino;
@@ -12,10 +13,10 @@ public class Gancho : MonoBehaviour
 
    [SerializeField] bool touch=false;
     [SerializeField]float velocy;
-    [SerializeField]float limitRadio;
+   public float limitRadio;
 
     [Header("Area Limite ")]
-    [SerializeField] Transform area;
+    
     [SerializeField] Transform punto;
 
     [Header("Limite de distancia")]
@@ -26,40 +27,32 @@ public class Gancho : MonoBehaviour
 
     [Header("Cadena")]
    Transform spawMano;
-    float cotaDista;
+    [SerializeField]float cotaDista;
     [SerializeField] GameObject cadeO;
-
-
+    [SerializeField]List<GameObject> cadenas;
+    enum movimiento { avanzar,regresar,transladar,final};
+    movimiento miEstado;
     // Start is called before the first frame update
     void Start()
     {
         Debug.Log("Nazco");
-
+        miEstado = movimiento.avanzar;
+        scriP.saltar = false;
         origidistan = Vector2.Distance(transform.position, destino);
         //spawn cadena 
         GameObject shit = GameObject.FindGameObjectWithTag("SpawnMano");
         spawMano = shit.GetComponent<Transform>();
+
         cotaDista = Vector3.Distance(spawMano.position, transform.position);
-        //areas visuales
-        //area = GameObject.FindGameObjectWithTag("RadioLimite ").GetComponent<Transform>();
-        //area.localScale = new Vector3(limitRadio, limitRadio, limitRadio);
-
-        punto = GameObject.FindGameObjectWithTag("Point").GetComponent<Transform>();
-        punto.position= destino;
-
+       
         StartCoroutine(Mover());
 
-
-       
-
-       
-        
     }
     
     IEnumerator Mover()
     {
         Debug.Log("Entro corrutina");
-        while (!touch)
+        while (miEstado==movimiento.avanzar)
         {
             actDista = Vector3.Distance(transform.position, destino);
             recDistan = origidistan - actDista;
@@ -79,28 +72,56 @@ public class Gancho : MonoBehaviour
 
                 if (Vector3.Distance(spawMano.position, transform.position) >= cotaDista + 0.55f)
                 {
-                    GameObject.Instantiate(cadeO, spawMano.position, Quaternion.Euler(0, 0, angulo), transform);
+                    GameObject cadeAux=GameObject.Instantiate(cadeO, spawMano.position, Quaternion.Euler(0, 0, angulo), transform);
+                    cadenas.Add(cadeAux);
                     cotaDista += 0.55f;
                 }
             }
             else
             {
-                touch = true;
+                cotaDista = Vector3.Distance(spawMano.position, transform.position);
+                miEstado =movimiento.regresar;
             }
             
             yield return null;
         }
-        while (touch)
+        while (miEstado == movimiento.regresar)
         {
             Debug.Log("Me muevo a atras ");
-            if (transform.localScale.x > 0)
+
+            
+
+            if (Vector3.Distance(transform.position , spawMano.position) >0.3f)
             {
-                transform.Translate(Vector2.left * velocy * Time.deltaTime);
+                
+                if (transform.localScale.x > 0)
+                {
+                    transform.Translate(Vector2.left * velocy * Time.deltaTime);
+                }
+                else
+                {
+                    transform.Translate(Vector2.right * velocy * Time.deltaTime);
+                }
+
+                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f)
+                {
+
+                    Debug.LogWarning("elimino cadenas ");
+                    Destroy(cadenas[cadenas.Count - 1].gameObject);
+                    cadenas.RemoveAt(cadenas.Count - 1);
+                    cotaDista -= 0.53f;
+                    
+                }
             }
             else
             {
-                 transform.Translate(Vector2.right * velocy * Time.deltaTime);
+                miEstado = movimiento.final;
+
+                scriP.GetComponent<Animator>().SetBool("Gancho", false);
+                Morir();
             }
+                
+            
             
 
             yield return null;
@@ -114,12 +135,20 @@ public class Gancho : MonoBehaviour
         if (collision.gameObject.CompareTag("Suelo"))
         {
             Debug.Log("Toco suelo");
-            touch = true;
+            miEstado = movimiento.regresar;
+
         }
         else if (collision.gameObject.CompareTag("Catch"))
         {
+            scriP.saltar = true;
             Debug.Log("Toco algo");
             touch = true;
+        }
+        else if (collision.gameObject.CompareTag("Enemy"))
+        {
+            
+            Debug.Log("Toco algo");
+            miEstado = movimiento.regresar;
         }
     }
     
@@ -127,5 +156,9 @@ public class Gancho : MonoBehaviour
     {
         
         Destroy(this.gameObject);
+    }
+    void RestaurarPropiedades()
+    {
+        //dinamico shoot mov false
     }
 }

@@ -6,6 +6,9 @@ public class Player : MonoBehaviour
 {
     [SerializeField] float vidas = 100;
     Rigidbody2D rb;
+    [Header("Cursor")]
+    Vector2 cursorPos;
+    [SerializeField]GameObject cursorObj;
 
     [Header("MOVIMIENTO")]
     [SerializeField]bool mov;
@@ -21,6 +24,7 @@ public class Player : MonoBehaviour
     float gravityInicial;
 
     [Header("Salto")]
+    public bool saltar=true;
     [SerializeField] LayerMask Suelo;
     [SerializeField] int saltosMax;
     [SerializeField] int saltosRes;
@@ -32,13 +36,16 @@ public class Player : MonoBehaviour
 
     [Header("ATAQUES")]
 
+
     [Header("Gancho")]
+    [SerializeField] Transform area;
     [SerializeField] bool shoot;
     [SerializeField]GameObject gancho;
     [SerializeField] Camera camara;
     [SerializeField] Transform spawnGanch;
-    Vector2 objetivo;
+    [SerializeField] GameObject instGancho;
     float anguloRot;
+    public float longCad=6;
 
     // AREA DE DETECCION
     // CADENA
@@ -56,12 +63,13 @@ public class Player : MonoBehaviour
     void Update()
     {
 
-
-
+        RevelarCursor();
+        LimiteGancho();
         ItsGrounded();
+        Saltar();
         if (mov)
         {
-            Saltar();
+            
             Animacio();
             AccionarGancho();
         }
@@ -181,8 +189,13 @@ public class Player : MonoBehaviour
     void Saltar()
     {
 
-        if (Input.GetKeyDown(KeyCode.Space) && saltosRes > 0) //&& anim.GetBool("attacking") == false)
+        if (Input.GetKeyDown(KeyCode.Space) && saltosRes > 0&&saltar) //&& anim.GetBool("attacking") == false)
         {
+            if (instGancho)
+            {
+                instGancho.GetComponent<Gancho>().Morir();
+            }
+
 
 
             if (saltosRes > 1 && ItsGrounded() == true)
@@ -219,21 +232,24 @@ public class Player : MonoBehaviour
         
         
 
-        GameObject newHand = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0,0,anguloRot));
-        
+        instGancho = GameObject.Instantiate(gancho,spawnGanch.position , Quaternion.Euler(0,0,anguloRot));
+        Gancho scriptG= instGancho.GetComponent<Gancho>();
         if (transform.localScale.x < 0)
         {
-            newHand.GetComponent<Transform>().localScale = new Vector3(-1, 1, 1);
+            instGancho.GetComponent<Transform>().localScale = new Vector3(-1, 1, 1);
         }
 
-        newHand.GetComponent<Gancho>().destino=objetivo;
-        newHand.GetComponent<Gancho>().angulo = anguloRot;
+        scriptG.destino = cursorPos;
+        scriptG.angulo = anguloRot;
+        scriptG.limitRadio=longCad;
+        scriptG.scriP = this.gameObject.GetComponent<Player>();
 
 
     }
+
     void AccionarGancho()
     {
-        if (Input.GetMouseButtonDown(1) && ValidarAngulo()&& ItsGrounded()&&shoot)
+        if (Input.GetMouseButtonDown(1) && ValidarAngulo() && ItsGrounded()&&shoot)
         {
             mov = false;
             shoot = false;
@@ -245,15 +261,36 @@ public class Player : MonoBehaviour
 
         }
     }
+
+    void LimiteGancho()
+    {
+        area = GameObject.FindGameObjectWithTag("RadioLimite ").GetComponent<Transform>();
+        area.localScale = new Vector3(longCad * 2, longCad * 2, longCad * 2);
+    }
+
+    void RevelarCursor()
+    {
+        cursorPos = camara.ScreenToWorldPoint(Input.mousePosition);
+        cursorObj.GetComponent<Transform>().position = cursorPos;
+        if (ValidarAngulo())
+        {
+            cursorObj.SetActive(true);
+        }
+        else
+        {
+            cursorObj.SetActive(false);
+        }
+    }
+
     bool ValidarAngulo()
     {
-        objetivo = camara.ScreenToWorldPoint(Input.mousePosition);
+        
 
-        float anguloRad = Mathf.Atan2(objetivo.y - transform.position.y, objetivo.x - transform.position.x);
+        float anguloRad = Mathf.Atan2(cursorPos.y - transform.position.y, cursorPos.x - transform.position.x);
         float anguloReal = ((180 * anguloRad) / Mathf.PI);
         float anguloClamp;
 
-        Debug.Log("ANGULO " + anguloReal);
+        //Debug.Log("ANGULO " + anguloReal);
 
         if (transform.localScale.x > 0)
         {
@@ -263,7 +300,7 @@ public class Player : MonoBehaviour
                 Debug.Log("DENTRO ENTRE 60 Y -60");
                 anguloClamp = anguloReal;
                 anguloRot = anguloClamp;
-
+                
                 return true;
             }
             else
@@ -292,11 +329,12 @@ public class Player : MonoBehaviour
                     anguloRot = anguloClamp;
                     Debug.Log("NEGATVIO Y ABSOLUTO ES " + anguloClamp);
                 }
-
+                
                 return true;
             }
             else
             {
+                
                 return false;
             }
             
