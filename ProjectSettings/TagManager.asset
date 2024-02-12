@@ -9,6 +9,7 @@ TagManager:
   - Catch
   - 'RadioLimite '
   - Point
+  - Enemy
   layers:
   - Default
   - TransparentFX

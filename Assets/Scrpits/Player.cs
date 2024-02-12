@@ -4,14 +4,20 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [SerializeField] float vidas = 100;
-    Rigidbody2D rb;
+    
+    public Rigidbody2D rb;
+
     [Header("Cursor")]
     Vector2 cursorPos;
+
     [SerializeField]GameObject cursorObj;
+    [Header("VARIABLES BASIC")]
+    [SerializeField] float vidas = 100;
+    public int capGas;
+    int gitones;
 
     [Header("MOVIMIENTO")]
-    [SerializeField]bool mov;
+    public bool mov;
     [Header("Desplazameinto Simple ")]
     [SerializeField] float velocityMovimiento;
     [SerializeField] float velocidadMaxima;
@@ -39,13 +45,16 @@ public class Player : MonoBehaviour
 
     [Header("Gancho")]
     [SerializeField] Transform area;
-    [SerializeField] bool shoot;
+    public bool shoot;
     [SerializeField]GameObject gancho;
     [SerializeField] Camera camara;
     [SerializeField] Transform spawnGanch;
     [SerializeField] GameObject instGancho;
+    Vector2 posGanFin;
     float anguloRot;
     public float longCad=6;
+    [Header("Metal")]
+    [SerializeField]bool metal;
 
     // AREA DE DETECCION
     // CADENA
@@ -67,6 +76,7 @@ public class Player : MonoBehaviour
         LimiteGancho();
         ItsGrounded();
         Saltar();
+        Metal();
         if (mov)
         {
             
@@ -193,12 +203,13 @@ public class Player : MonoBehaviour
         {
             if (instGancho)
             {
+                RestaurarProGancho();
+                anim.SetBool("Gancho", false);
                 instGancho.GetComponent<Gancho>().Morir();
+                anim.SetTrigger("Jumping2");
+                Impulso();
             }
-
-
-
-            if (saltosRes > 1 && ItsGrounded() == true)
+           else if (saltosRes > 1 && ItsGrounded() == true)
             {
                
 
@@ -207,14 +218,8 @@ public class Player : MonoBehaviour
             }
             else
             {
-                
-
-
-                rb.velocity = new Vector2(rb.velocity.x, 0);
-                rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
-
                 anim.SetTrigger("Jumping2");
-                saltosRes--;
+                Impulso();
             }
         }
     }
@@ -224,6 +229,20 @@ public class Player : MonoBehaviour
         rb.velocity = new Vector2(rb.velocity.x, 0);
         rb.AddForce(new Vector3(0, 1, 0) * forceJump, ForceMode2D.Impulse);
         saltosRes--;
+    }
+
+    void RevelarCursor()
+    {
+        cursorPos = camara.ScreenToWorldPoint(Input.mousePosition);
+        cursorObj.GetComponent<Transform>().position = cursorPos;
+        if (ValidarAngulo())
+        {
+            cursorObj.SetActive(true);
+        }
+        else
+        {
+            cursorObj.SetActive(false);
+        }
     }
 
     public void DisparoGancho()
@@ -240,6 +259,7 @@ public class Player : MonoBehaviour
         }
 
         scriptG.destino = cursorPos;
+        posGanFin = cursorPos;
         scriptG.angulo = anguloRot;
         scriptG.limitRadio=longCad;
         scriptG.scriP = this.gameObject.GetComponent<Player>();
@@ -268,20 +288,6 @@ public class Player : MonoBehaviour
         area.localScale = new Vector3(longCad * 2, longCad * 2, longCad * 2);
     }
 
-    void RevelarCursor()
-    {
-        cursorPos = camara.ScreenToWorldPoint(Input.mousePosition);
-        cursorObj.GetComponent<Transform>().position = cursorPos;
-        if (ValidarAngulo())
-        {
-            cursorObj.SetActive(true);
-        }
-        else
-        {
-            cursorObj.SetActive(false);
-        }
-    }
-
     bool ValidarAngulo()
     {
         
@@ -294,10 +300,10 @@ public class Player : MonoBehaviour
 
         if (transform.localScale.x > 0)
         {
-            Debug.Log("DERECHA");
+           // Debug.Log("DERECHA");
             if (anguloReal < 60 && anguloReal > -60)
             {
-                Debug.Log("DENTRO ENTRE 60 Y -60");
+                //Debug.Log("DENTRO ENTRE 60 Y -60");
                 anguloClamp = anguloReal;
                 anguloRot = anguloClamp;
                 
@@ -315,19 +321,19 @@ public class Player : MonoBehaviour
             if (anguloReal < -120 && anguloReal > -180 || anguloReal > 120 && anguloReal < 180)
             {
                 
-                Debug.Log("DENTRO ENTRE 120 Y -120");
+                //Debug.Log("DENTRO ENTRE 120 Y -120");
                 if (anguloReal > 0)
                 {
                     anguloClamp = (180 - anguloReal) * -1;
                     anguloRot = anguloClamp;
-                    Debug.Log("POSITIVO Y ABSOLUTO ES " + anguloClamp);
+                   // Debug.Log("POSITIVO Y ABSOLUTO ES " + anguloClamp);
                 }
                 else
                 {
 
                     anguloClamp = 180 + anguloReal;
                     anguloRot = anguloClamp;
-                    Debug.Log("NEGATVIO Y ABSOLUTO ES " + anguloClamp);
+                    //Debug.Log("NEGATVIO Y ABSOLUTO ES " + anguloClamp);
                 }
                 
                 return true;
@@ -341,8 +347,85 @@ public class Player : MonoBehaviour
         }
     }
 
-    public void RecibierDaño(float exterDano)
+    public void RestaurarProGancho()
     {
-        vidas = -exterDano;
+        mov = true;
+        shoot = true;
+        rb.bodyType = RigidbodyType2D.Dynamic;
+        saltar = true;
+        //dinamico shoot mov false
+    }
+
+    public IEnumerator IrGancho(float velocy)
+    {
+        while (Vector2.Distance(transform.position,posGanFin)>2)
+        {
+            Debug.Log("voy al gancho");
+            transform.position=Vector2.MoveTowards(transform.position, posGanFin, 6*Time.deltaTime );
+
+            yield return null;
+         }
+       
+        
+        RestaurarProGancho();
+        anim.SetBool("Gancho", false);
+        instGancho.GetComponent<Gancho>().Morir();
+     }
+
+    void Metal() 
+    {
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            if (!metal && shoot)
+            {
+                Debug.LogWarning("me transformo en metal");
+                anim.SetBool("Metal", true);
+                BlockeoMetal();
+            }
+            else if(metal&&!shoot)      
+            {
+                Debug.LogWarning("me transformo en NORMAL");
+                anim.SetBool("Metal", false);
+            }
+            else
+            {
+                Debug.LogWarning("ESTA EL GANCHO ACTIVO ");
+            }
+            
+
+        }
+
+    }
+    public void BlockeoMetal()
+    {
+        if (!metal)
+        {
+            Debug.LogWarning("BLOCKEO");
+            mov = false;
+            shoot = false;
+            saltar = false;
+            rb.velocity = Vector2.zero;
+            rb.gravityScale = 8;
+            metal = true;
+        }
+        else
+        {
+            Debug.LogWarning("DESBLOCKEO");
+            mov = true;
+            shoot = true;
+            saltar = true;
+            rb.gravityScale = gravityInicial;
+            metal = false;
+
+        }
+        
+    }
+    public void RecibierDano(float exterDano)
+    {
+        if (!metal)
+        {
+            vidas = -exterDano;
+        }
+        
     }
 }

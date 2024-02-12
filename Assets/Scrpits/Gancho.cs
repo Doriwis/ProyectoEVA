@@ -6,12 +6,11 @@ public class Gancho : MonoBehaviour
 {
 
     public  Player scriP;
-
+    [SerializeField]float damage;
     [Header("Movimiento")]
     public Vector2 destino;
     public float angulo;
 
-   [SerializeField] bool touch=false;
     [SerializeField]float velocy;
    public float limitRadio;
 
@@ -35,6 +34,7 @@ public class Gancho : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        GameObject.FindWithTag("Point").GetComponent<Transform>().position = destino;
         Debug.Log("Nazco");
         miEstado = movimiento.avanzar;
         scriP.saltar = false;
@@ -126,6 +126,28 @@ public class Gancho : MonoBehaviour
 
             yield return null;
         }
+        if (miEstado == movimiento.transladar)
+        {
+            StartCoroutine(scriP.IrGancho(velocy));
+            while (miEstado == movimiento.transladar)
+            {
+
+
+
+                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f)
+                {
+
+                    Debug.LogWarning("elimino cadenas ");
+                    Destroy(cadenas[cadenas.Count - 1].gameObject);
+                    cadenas.RemoveAt(cadenas.Count - 1);
+                    cotaDista -= 0.53f;
+
+                }
+                yield return null;
+            }
+        
+           
+        }
         Debug.Log("Termina corrutina");
     }
    
@@ -140,14 +162,16 @@ public class Gancho : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Catch"))
         {
+            miEstado = movimiento.transladar;
             scriP.saltar = true;
             Debug.Log("Toco algo");
-            touch = true;
+            
         }
         else if (collision.gameObject.CompareTag("Enemy"))
         {
             
             Debug.Log("Toco algo");
+           // collision.gameObject.GetComponent<Enemy>().RecibirDano(damage);
             miEstado = movimiento.regresar;
         }
     }
@@ -157,8 +181,5 @@ public class Gancho : MonoBehaviour
         
         Destroy(this.gameObject);
     }
-    void RestaurarPropiedades()
-    {
-        //dinamico shoot mov false
-    }
+    
 }
