@@ -24,7 +24,7 @@ public class Player : MonoBehaviour
     Vector3 ajuste;
     [SerializeField] float h;
     [SerializeField] float v;
-    [SerializeField] float daño;
+    
 
     [Header("Correción de las rampas")]
     float gravityInicial;
@@ -38,14 +38,21 @@ public class Player : MonoBehaviour
     [SerializeField] float distSuelo;
 
     [Header("ANIMACION")]
+
     Animator anim;
 
     [Header("ATAQUES")]
 
+    [SerializeField] float damage;
+
+    [SerializeField]Transform transOverlap;
+    [SerializeField]float oveRadio;
+    [SerializeField] LayerMask maskEnemy;
 
     [Header("Gancho")]
     [SerializeField] Transform area;
-    public bool shoot;
+    public bool power;
+    [SerializeField] bool canShoot;
     [SerializeField]GameObject gancho;
     [SerializeField] Camera camara;
     [SerializeField] Transform spawnGanch;
@@ -77,6 +84,7 @@ public class Player : MonoBehaviour
         ItsGrounded();
         Saltar();
         Metal();
+        Atttack();
         if (mov)
         {
             
@@ -195,7 +203,11 @@ public class Player : MonoBehaviour
         }
     }
 
-
+    IEnumerator FalseGancho()
+    {
+        yield return new WaitForSeconds(0.2f);
+        anim.SetBool("Gancho", false);
+    }
     void Saltar()
     {
 
@@ -204,10 +216,11 @@ public class Player : MonoBehaviour
             if (instGancho)
             {
                 RestaurarProGancho();
-                anim.SetBool("Gancho", false);
+               
                 instGancho.GetComponent<Gancho>().Morir();
                 anim.SetTrigger("Jumping2");
                 Impulso();
+                StartCoroutine(FalseGancho());
             }
            else if (saltosRes > 1 && ItsGrounded() == true)
             {
@@ -223,7 +236,7 @@ public class Player : MonoBehaviour
             }
         }
     }
-
+    
     public void Impulso()
     {
         rb.velocity = new Vector2(rb.velocity.x, 0);
@@ -269,10 +282,10 @@ public class Player : MonoBehaviour
 
     void AccionarGancho()
     {
-        if (Input.GetMouseButtonDown(1) && ValidarAngulo() && ItsGrounded()&&shoot)
+        if (Input.GetMouseButtonDown(1) && ValidarAngulo() && ItsGrounded()&&power&&canShoot    )
         {
             mov = false;
-            shoot = false;
+            power = false;
             
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.velocity = Vector3.zero;
@@ -350,7 +363,7 @@ public class Player : MonoBehaviour
     public void RestaurarProGancho()
     {
         mov = true;
-        shoot = true;
+        power = true;
         rb.bodyType = RigidbodyType2D.Dynamic;
         saltar = true;
         //dinamico shoot mov false
@@ -376,13 +389,13 @@ public class Player : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Q))
         {
-            if (!metal && shoot)
+            if (!metal && power)
             {
                 Debug.LogWarning("me transformo en metal");
                 anim.SetBool("Metal", true);
                 BlockeoMetal();
             }
-            else if(metal&&!shoot)      
+            else if(metal&&!power)      
             {
                 Debug.LogWarning("me transformo en NORMAL");
                 anim.SetBool("Metal", false);
@@ -402,7 +415,7 @@ public class Player : MonoBehaviour
         {
             Debug.LogWarning("BLOCKEO");
             mov = false;
-            shoot = false;
+            power = false;
             saltar = false;
             rb.velocity = Vector2.zero;
             rb.gravityScale = 8;
@@ -412,13 +425,79 @@ public class Player : MonoBehaviour
         {
             Debug.LogWarning("DESBLOCKEO");
             mov = true;
-            shoot = true;
+            power = true;
             saltar = true;
             rb.gravityScale = gravityInicial;
             metal = false;
 
         }
         
+    }
+    IEnumerator RestauroAtaque()
+    {
+        yield return new WaitForSeconds(0.2f);
+        mov = true;
+        power = true;
+        saltar = true;
+    }
+    void Atttack()
+    {
+        if (Input.GetMouseButtonDown(0)&&ItsGrounded()&&power&&canShoot)
+        {
+            Debug.LogWarning("CLCIK IZQUIERDO");
+
+            anim.SetBool("Attacking", true);
+            mov = false;
+            power = false;
+            saltar = false;
+            rb.velocity = Vector2.zero;
+        }
+    }
+    public void SigoAtacando()
+    {
+        if (Input.GetKey(KeyCode.Tab))
+        {
+            Debug.LogWarning("TABULADOR");
+            anim.SetBool("Attacking", true);
+        }
+        else
+        {
+            anim.SetBool("Attacking", false);
+            StartCoroutine(RestauroAtaque());
+        }
+        
+
+    }
+   
+    public void FinAtaque()
+    {
+        Debug.LogWarning("TERMINAR");
+        anim.SetBool("Attacking", false);
+        StartCoroutine(RestauroAtaque());
+    }
+    private void OnDrawGizmos()
+    { //Detec duelo
+        Gizmos.DrawSphere(transOverlap.position, oveRadio);
+       
+        
+    }
+    public void OverlabAttack()
+    {
+        Collider2D cesta=Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
+        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage);
+
+    }
+    public void OverlabAttack2()
+    {
+        Collider2D cesta = Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
+        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage+5);
+
+    }
+    public void OverlabAttack3()
+    {
+        Collider2D cesta = Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
+        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage+10);
+
     }
     public void RecibierDano(float exterDano)
     {

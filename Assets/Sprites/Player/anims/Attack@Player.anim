@@ -21,19 +21,19 @@ AnimationClip:
   - curve:
     - time: 0
       value: {fileID: 1746205627445037729, guid: e7de14fe8f7f4ee4783025afe63a0f0d, type: 3}
-    - time: 0.14285715
+    - time: 0.1
       value: {fileID: 3724054350221700656, guid: e7de14fe8f7f4ee4783025afe63a0f0d, type: 3}
-    - time: 0.2857143
+    - time: 0.2
       value: {fileID: -1500682259330578422, guid: e7de14fe8f7f4ee4783025afe63a0f0d, type: 3}
-    - time: 0.42857143
+    - time: 0.3
       value: {fileID: 7580645740705882379, guid: e7de14fe8f7f4ee4783025afe63a0f0d, type: 3}
-    - time: 0.5714286
+    - time: 0.4
       value: {fileID: 7275174643150791444, guid: e7de14fe8f7f4ee4783025afe63a0f0d, type: 3}
     attribute: m_Sprite
     path: 
     classID: 212
     script: {fileID: 0}
-  m_SampleRate: 7
+  m_SampleRate: 10
   m_WrapMode: 0
   m_Bounds:
     m_Center: {x: 0, y: 0, z: 0}
@@ -58,7 +58,7 @@ AnimationClip:
     m_AdditiveReferencePoseClip: {fileID: 0}
     m_AdditiveReferencePoseTime: 0
     m_StartTime: 0
-    m_StopTime: 0.71428573
+    m_StopTime: 0.5
     m_OrientationOffsetY: 0
     m_Level: 0
     m_CycleOffset: 0
@@ -78,15 +78,8 @@ AnimationClip:
   m_HasGenericRootTransform: 0
   m_HasMotionFloatCurves: 0
   m_Events:
-  - time: 0
-    functionName: 
-    data: 
-    objectReferenceParameter: {fileID: 0}
-    floatParameter: 0
-    intParameter: 0
-    messageOptions: 0
-  - time: 0.71428573
-    functionName: 
+  - time: 0.4
+    functionName: SigoAtacando
     data: 
     objectReferenceParameter: {fileID: 0}
     floatParameter: 0
