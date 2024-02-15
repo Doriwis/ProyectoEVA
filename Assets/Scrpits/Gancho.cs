@@ -103,10 +103,10 @@ public class Gancho : MonoBehaviour
                     transform.Translate(Vector2.right * velocy * Time.deltaTime);
                 }
 
-                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f)
+                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f&&cadenas.Count > 0)
                 {
 
-                    Debug.LogWarning("elimino cadenas ");
+                    Debug.Log("elimino cadenas ");
                     Destroy(cadenas[cadenas.Count - 1].gameObject);
                     cadenas.RemoveAt(cadenas.Count - 1);
                     cotaDista -= 0.53f;
@@ -134,7 +134,7 @@ public class Gancho : MonoBehaviour
 
 
 
-                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f)
+                if (Vector3.Distance(spawMano.position, transform.position) <= cotaDista - 0.50f&&cadenas.Count>0)
                 {
 
                     Debug.LogWarning("elimino cadenas ");

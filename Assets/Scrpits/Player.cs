@@ -6,7 +6,7 @@ public class Player : MonoBehaviour
 {
     
     public Rigidbody2D rb;
-
+    [SerializeField] Vector2 rbVelocy;
     [Header("Cursor")]
     Vector2 cursorPos;
 
@@ -78,6 +78,7 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        rbVelocy = rb.velocity;
 
         RevelarCursor();
         LimiteGancho();
@@ -138,10 +139,10 @@ public class Player : MonoBehaviour
         {
             if (rb.velocity.y <= 0)
             {
-                Debug.Log("estoy en el suelo ");
+                
                 saltosRes = saltosMax;
                 anim.SetBool("Falling", true);
-
+                Debug.Log("estoy en el suelo ");
                 anim.SetBool("Falling", false);
             }
 
@@ -169,7 +170,7 @@ public class Player : MonoBehaviour
 
     }
 
-    //Para que no resvale en las cuestas
+    //Para que no resbale en las cuestas
 
     private void OnCollisionStay2D(Collision2D collision)
     {
@@ -208,6 +209,11 @@ public class Player : MonoBehaviour
         yield return new WaitForSeconds(0.2f);
         anim.SetBool("Gancho", false);
     }
+    IEnumerator TrueShoot()
+    {
+        yield return new WaitForSeconds(0.4f);
+        canShoot = true;
+    }
     void Saltar()
     {
 
@@ -224,10 +230,11 @@ public class Player : MonoBehaviour
             }
            else if (saltosRes > 1 && ItsGrounded() == true)
             {
-               
+                Debug.LogWarning("Activo salto 1");
 
+                canShoot = false;
                 anim.SetTrigger("Jumping");
-
+                StartCoroutine(TrueShoot());
             }
             else
             {
@@ -284,9 +291,10 @@ public class Player : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(1) && ValidarAngulo() && ItsGrounded()&&power&&canShoot    )
         {
+            Debug.LogWarning("Boton gancho");
             mov = false;
             power = false;
-            
+            saltar = false;
             rb.bodyType = RigidbodyType2D.Kinematic;
             rb.velocity = Vector3.zero;
             
@@ -374,7 +382,7 @@ public class Player : MonoBehaviour
         while (Vector2.Distance(transform.position,posGanFin)>2)
         {
             Debug.Log("voy al gancho");
-            transform.position=Vector2.MoveTowards(transform.position, posGanFin, 6*Time.deltaTime );
+            transform.position=Vector2.MoveTowards(transform.position, posGanFin, 15*Time.deltaTime );
 
             yield return null;
          }
@@ -413,7 +421,7 @@ public class Player : MonoBehaviour
     {
         if (!metal)
         {
-            Debug.LogWarning("BLOCKEO");
+            Debug.LogWarning("BLOCKEOMETAL");
             mov = false;
             power = false;
             saltar = false;
@@ -423,7 +431,7 @@ public class Player : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("DESBLOCKEO");
+            Debug.LogWarning("DESBLOCKEOMETAL");
             mov = true;
             power = true;
             saltar = true;
@@ -471,7 +479,6 @@ public class Player : MonoBehaviour
    
     public void FinAtaque()
     {
-        Debug.LogWarning("TERMINAR");
         anim.SetBool("Attacking", false);
         StartCoroutine(RestauroAtaque());
     }

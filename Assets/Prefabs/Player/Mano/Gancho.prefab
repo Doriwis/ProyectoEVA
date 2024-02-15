@@ -146,7 +146,7 @@ MonoBehaviour:
   damage: 0
   destino: {x: 0, y: 0}
   angulo: 0
-  velocy: 10
+  velocy: 25
   limitRadio: 6
   punto: {fileID: 0}
   origidistan: 0
