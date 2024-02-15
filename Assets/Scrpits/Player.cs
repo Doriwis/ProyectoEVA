@@ -450,7 +450,7 @@ public class Player : MonoBehaviour
     }
     void Atttack()
     {
-        if (Input.GetMouseButtonDown(0)&&ItsGrounded()&&power&&canShoot)
+        if (Input.GetMouseButtonDown(0)&&power&&canShoot)
         {
             Debug.LogWarning("CLCIK IZQUIERDO");
 
@@ -491,26 +491,40 @@ public class Player : MonoBehaviour
     public void OverlabAttack()
     {
         Collider2D cesta=Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
-        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage);
+        if (cesta)
+        {
+            cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage);
+        }
+       
 
     }
     public void OverlabAttack2()
     {
         Collider2D cesta = Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
-        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage+5);
+        if (cesta)
+        {
+            cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage + 5);
+        }
+            
 
     }
     public void OverlabAttack3()
     {
         Collider2D cesta = Physics2D.OverlapCircle(transOverlap.position, oveRadio, maskEnemy);
-        cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage+10);
+        if (cesta)
+        {
+            cesta.gameObject.GetComponent<Enemy>().RecibirDano(damage + 10);
+        }
+        
 
     }
     public void RecibierDano(float exterDano)
     {
+        
         if (!metal)
         {
-            vidas = -exterDano;
+            Debug.LogError("Entro en daño ");
+            vidas -=exterDano;
         }
         
     }
