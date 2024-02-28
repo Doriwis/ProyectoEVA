@@ -72,14 +72,14 @@ public class Player : MonoBehaviour
         anim = GetComponent<Animator>();
         saltosRes = saltosMax;
         gravityInicial = rb.gravityScale;
-
+        
     }
 
     // Update is called once per frame
     void Update()
     {
         rbVelocy = rb.velocity;
-
+        
         RevelarCursor();
         LimiteGancho();
         ItsGrounded();
@@ -115,6 +115,8 @@ public class Player : MonoBehaviour
             Debug.Log("Derecha");
 
             anim.SetBool("Runnig", true);
+           
+            
         }
         else if (h < 0)
         {
