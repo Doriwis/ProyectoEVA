@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 8426211806181343858}
   - component: {fileID: 8426211806181343856}
   - component: {fileID: 8426211806181343857}
-  - component: {fileID: 8426211806181343863}
+  - component: {fileID: 9223324747009885720}
   m_Layer: 6
   m_Name: Rata
   m_TagString: Enemy
@@ -155,7 +155,7 @@ MonoBehaviour:
     m_Bits: 128
   spawnOverlap: {fileID: 8426211805645160850}
   radio: 1
-  previewArea: 1
+  previewArea: 0
   distacia: 20
   area: {fileID: 8426211806320437380}
 --- !u!50 &8426211806181343856
@@ -198,8 +198,8 @@ Animator:
   m_HasTransformHierarchy: 1
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorControllerStateOnDisable: 0
---- !u!61 &8426211806181343863
-BoxCollider2D:
+--- !u!58 &9223324747009885720
+CircleCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -212,18 +212,8 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
-  m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 2, y: 1.3333334}
-    newSize: {x: 1, y: 1}
-    adaptiveTilingThreshold: 0.5
-    drawMode: 0
-    adaptiveTiling: 0
-  m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 2, y: 1.3333334}
-  m_EdgeRadius: 0
+  m_Radius: 0.65
 --- !u!1 &8426211806320437380
 GameObject:
   m_ObjectHideFlags: 0

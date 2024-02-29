@@ -7,40 +7,33 @@ public class Cohete : MonoBehaviour
     // VA EN LOS COHETES
     Vector3 position;
     
-    Transform posPlayer;
+    [SerializeField]Transform posPlayer;
 
     [SerializeField] float velocidad;
-
-    Animator anim;
-
+    [Header("OVERLAP")]
+    [SerializeField] bool preview;
+    [SerializeField] float radio;
+    [SerializeField] LayerMask player;
+    [SerializeField] LayerMask enemy;
     // Start is called before the first frame update
     void Start()
     {
         position = transform.position;
-        anim = GetComponent<Animator>();
-        anim.SetBool("Running", true);
 
-       
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        posPlayer = player.GetComponent<Transform>();
     }
 
     // Update is called once per frame
     void Update()
     {
-        GameObject player = GameObject.FindGameObjectWithTag("Player");
-        posPlayer = player.GetComponent<Transform>();
+        
 
         var acercamiento = velocidad * Time.deltaTime; // calculate distance to move
-        Vector2.MoveTowards(position, posPlayer.position, acercamiento);//mover los ratones hacia player con translate
+        transform.position=Vector2.MoveTowards(transform.position, posPlayer.position, acercamiento);//mover los ratones hacia player con translate
         //que sigan al player
-
+        Giro();
         GiroCohete();
-    }
-
-    void Girar() // CUANDO la posicion en h de pleyer sea negativa?
-    {
-        Vector2 localScale = transform.localScale;
-        localScale.x *= -1;
-        transform.localScale = localScale;
     }
 
     void GiroCohete()
@@ -56,6 +49,57 @@ public class Cohete : MonoBehaviour
             transform.localScale = new Vector3(-1, 1, 1);
         }
 
+    }
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.GetComponent("Player"))
+        {
+            ExplocionPlayer();
+        }
+        else
+        {
+            ExplocionEnemy();
+        }
+    }
+    public void ExplocionPlayer()
+    {
+        Collider2D aux=Physics2D.OverlapCircle(transform.position, radio, player);
+        if (aux)
+        {
+            Morir();
+            Debug.LogError("booom P");
+        }
+    }
+    public void ExplocionEnemy()
+    {
+        Collider2D aux = Physics2D.OverlapCircle(transform.position, radio, enemy);
+        if (aux)
+        {
+            
+            Debug.LogError("booom E O ");
+        }
+        Debug.LogError("booom  O ");
+
+        Morir();
+    }
+    private void OnDrawGizmos()
+    {
+        if (preview)
+        {
+            Gizmos.DrawSphere(transform.position, radio);
+        }
+
+
+    }
+    void Giro()
+    {
+        float anguloRad = Mathf.Atan2(posPlayer.position.y - transform.position.y, posPlayer.position.x - transform.position.x);
+        float anguloReal = ((180 * anguloRad) / Mathf.PI);
+        transform.rotation=Quaternion.Euler(0, 0, anguloReal);
+    }
+    public void Morir()
+    {
+        Destroy(this.gameObject);
     }
 
 }
