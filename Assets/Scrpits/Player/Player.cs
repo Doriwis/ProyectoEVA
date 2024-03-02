@@ -520,7 +520,7 @@ public class Player : MonoBehaviour
         
 
     }
-    public void RecibierDano(float exterDano)
+    public void RecibirDano(float exterDano)
     {
         
         if (!metal)

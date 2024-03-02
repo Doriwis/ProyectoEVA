@@ -111,7 +111,7 @@ public class Ratones : MonoBehaviour
             mov = false;
             rb.bodyType = RigidbodyType2D.Static;
             coll.isTrigger = true;
-            collision.gameObject.GetComponent<Player>().RecibierDano(damaFisi);
+            collision.gameObject.GetComponent<Player>().RecibirDano(damaFisi);
             StartCoroutine(SwitchMov());
 
         }
@@ -146,7 +146,7 @@ public class Ratones : MonoBehaviour
         if (cesta&&cesta.gameObject.CompareTag("Player"))
         {
             Debug.LogWarning("DETECTO PLAYER EXPLOCION");
-            cesta.gameObject.GetComponent<Player>().RecibierDano(damaExplo);
+            cesta.gameObject.GetComponent<Player>().RecibirDano(damaExplo);
         }
     }
     void Death()
