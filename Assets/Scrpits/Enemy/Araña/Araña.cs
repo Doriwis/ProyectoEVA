@@ -25,7 +25,8 @@ public class Araña : MonoBehaviour
     Vector3 position;
     Transform posPlayer;
     bool arañaEnSuelo;
-
+    enum Estado { techo,volando,suelo};
+    [SerializeField]Estado miPosicion;
     [SerializeField] bool bajar;
     [Header("Radio")]
     [SerializeField] bool setArea;
@@ -38,12 +39,14 @@ public class Araña : MonoBehaviour
     [SerializeField] int destino;
     [SerializeField] Transform punto1;
     [SerializeField] Transform punto2;
+
     [Header("Seguimiento")]
     [SerializeField] bool seguir;
+
     [Header("Overlap")]
     [SerializeField] float radio;
     [SerializeField] LayerMask suelo;
-
+    
     // Start is called before the first frame update
     void Start()
     {
@@ -63,9 +66,7 @@ public class Araña : MonoBehaviour
     }
     void Voltear()
     {
-        Vector2 localScale = transform.localScale;
-        localScale.y *= -1;
-        transform.localScale = localScale;
+        transform.localScale = new Vector2(-1, 1);
     }
     bool AreaDetect()
     {
@@ -95,41 +96,44 @@ public class Araña : MonoBehaviour
     {
         while (true)
         {
-            if (patrulla)
+            if (miPosicion==Estado.techo|| miPosicion == Estado.suelo)
             {
-                anim.SetBool("Running", true);
-
-                Debug.LogWarning("moevo patrol");
-                if (destino == 1)
+                if (patrulla)
                 {
+                    anim.SetBool("Running", true);
 
-                    if (transform.position.x >= punto1.position.x)
+                    Debug.LogWarning("moevo patrol");
+                    if (destino == 1)
                     {
-                        destino = 2;
-                        Debug.Log("Cambio de lado a 2");
+
+                        if (transform.position.x >= punto1.position.x)
+                        {
+                            destino = 2;
+                            Debug.Log("Cambio de lado a 2");
+                        }
+                        else
+                        {
+                            transform.localScale = new Vector3(-1, 1, 1);
+                            rbAraña.velocity = new Vector2(velocidad, rbAraña.velocity.y);
+                        }
+
+
                     }
-                    else
+                    else if (destino == 2)
                     {
-                        transform.localScale = new Vector3(-1, 1, 1);
-                        rbAraña.velocity = new Vector2(velocidad, rbAraña.velocity.y);
+                        if (transform.position.x <= punto2.position.x)
+                        {
+                            destino = 1;
+                            Debug.Log("Cambio de lado a 1");
+                        }
+                        else
+                        {
+                            transform.localScale = new Vector3(1, 1, 1);
+
+                            rbAraña.velocity = new Vector2(velocidad * -1, rbAraña.velocity.y);
+                        }
+
                     }
-
-
-                }
-                else if (destino == 2)
-                {
-                    if (transform.position.x <= punto2.position.x)
-                    {
-                        destino = 1;
-                        Debug.Log("Cambio de lado a 1");
-                    }
-                    else
-                    {
-                        transform.localScale = new Vector3(1, 1, 1);
-
-                        rbAraña.velocity = new Vector2(velocidad * -1, rbAraña.velocity.y);
-                    }
-
                 }
             }
 
@@ -144,20 +148,21 @@ public class Araña : MonoBehaviour
     void Bajar() 
     {
         bool estaPlayer = Physics2D.Raycast(transform.position, Vector2.down, distanciaRayo,player);  //mirar si el rayo sale para abajo o arriba
-
+        Debug.DrawRay(transform.position, Vector2.down * distanciaRayo, Color.cyan);
         // si golpea algo
         if (estaPlayer)
         {
-            StartCoroutine(itsGrounder());
+            
             Voltear();
             rbAraña.gravityScale = 1;
-            bajar = true;
+            miPosicion = Estado.volando;
+            StartCoroutine(itsGrounder());
         }
     }
 
     IEnumerator itsGrounder()
     {
-        while(rbAraña.velocity.y>=0 && bajar)
+        while( bajar)
         {
             patrulla = false;
             Collider2D call = Physics2D.OverlapCircle(transform.position, radio, suelo);
@@ -168,6 +173,10 @@ public class Araña : MonoBehaviour
             yield return null;
         }
 
+    }
+    private void OnDrawGizmos()
+    {
+        Gizmos.DrawSphere(transform.position, radio);
     }
     void SeguirPlayer() 
     {
