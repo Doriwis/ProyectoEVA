@@ -10,7 +10,7 @@ public class Enemy : MonoBehaviour
 
     public void RecibirDano(float danOut)
     {
-        Debug.LogWarning("RECIBODAÑO");
+        Debug.LogWarning("RECIBODAÑO E");
         vida -= danOut;
     }
 }

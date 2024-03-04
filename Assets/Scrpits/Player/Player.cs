@@ -525,7 +525,7 @@ public class Player : MonoBehaviour
         
         if (!metal)
         {
-            Debug.LogError("Entro en daño ");
+            Debug.LogError("Entro en daño P ");
             vidas -=exterDano;
         }
         

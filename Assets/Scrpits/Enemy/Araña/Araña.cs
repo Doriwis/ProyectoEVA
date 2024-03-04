@@ -17,52 +17,49 @@ public class Araña : MonoBehaviour
     
     [SerializeField] float vida;
     [SerializeField] float velocidad;
-    [SerializeField] GameObject punto1;
-    [SerializeField] GameObject punto2;
     [SerializeField] LayerMask player;
 
     Rigidbody2D rbAraña;
     Animator anim;
-    Transform puntoActual;
     [SerializeField] float distanciaRayo;
     Vector3 position;
     Transform posPlayer;
     bool arañaEnSuelo;
+
+    [SerializeField] bool bajar;
+    [Header("Radio")]
+    [SerializeField] bool setArea;
+    [SerializeField] bool detect;
+    [SerializeField] float radioDect;
+    [SerializeField] Transform area;
+
+    [Header("Patrulla")]
+    [SerializeField]bool patrulla;
+    [SerializeField] int destino;
+    [SerializeField] Transform punto1;
+    [SerializeField] Transform punto2;
+    [Header("Seguimiento")]
+    [SerializeField] bool seguir;
+    [Header("Overlap")]
+    [SerializeField] float radio;
+    [SerializeField] LayerMask suelo;
 
     // Start is called before the first frame update
     void Start()
     {
         anim = GetComponent<Animator>();
         rbAraña = GetComponent<Rigidbody2D>();
-        puntoActual = punto2.transform;
-        anim.SetBool("Running", true);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        posPlayer = player.GetComponent<Transform>();
 
+        StartCoroutine(MovimientoEnPlataforma());
     }
 
     // Update is called once per frame
     void Update()
     {
-        MovimientoEnPlataforma();
         Bajar();
         SeguirPlayer();
-    }
-
-    public void RecibirDanho(float danho) //ejecutar desde evento en la animacion
-    {
-
-        vida -= danho;
-        if (vida <= 0)
-        {
-            Destroy(gameObject);
-
-        }
-    }
-
-    void Girar()
-    {
-        Vector2 localScale = transform.localScale;
-        localScale.x *= -1;
-        transform.localScale = localScale;
     }
     void Voltear()
     {
@@ -70,74 +67,118 @@ public class Araña : MonoBehaviour
         localScale.y *= -1;
         transform.localScale = localScale;
     }
-
-    void MovimientoEnPlataforma()
+    bool AreaDetect()
     {
-        //que se mueva constantemente de un punto a otro
-        Vector2 punto = puntoActual.position - transform.position;
-        if (puntoActual == punto2.transform)
+        area.localScale = new Vector2(radioDect * 2, radioDect * 2);
+        if (setArea)
         {
-            rbAraña.velocity = new Vector2(velocidad, rbAraña.velocity.y);
+            area.gameObject.SetActive(true);
         }
         else
         {
-            rbAraña.velocity = new Vector2(-velocidad, rbAraña.velocity.y);
+            area.gameObject.SetActive(false);
         }
 
-        if (Vector2.Distance(transform.position, puntoActual.position) < 0.5f && puntoActual == punto2.transform)
+        if (Vector2.Distance(transform.position, posPlayer.position) < radioDect)
         {
-            Girar();
-            puntoActual = punto1.transform;
+            detect=true;
+            return true;
         }
-        else if (Vector2.Distance(transform.position, puntoActual.position) < 0.5f && puntoActual == punto1.transform)
+        else
         {
-            Girar();
-            puntoActual = punto2.transform;
+            detect=false;
+            return false;
         }
-
-
     }
 
+    IEnumerator MovimientoEnPlataforma()
+    {
+        while (true)
+        {
+            if (patrulla)
+            {
+                anim.SetBool("Running", true);
+
+                Debug.LogWarning("moevo patrol");
+                if (destino == 1)
+                {
+
+                    if (transform.position.x >= punto1.position.x)
+                    {
+                        destino = 2;
+                        Debug.Log("Cambio de lado a 2");
+                    }
+                    else
+                    {
+                        transform.localScale = new Vector3(-1, 1, 1);
+                        rbAraña.velocity = new Vector2(velocidad, rbAraña.velocity.y);
+                    }
+
+
+                }
+                else if (destino == 2)
+                {
+                    if (transform.position.x <= punto2.position.x)
+                    {
+                        destino = 1;
+                        Debug.Log("Cambio de lado a 1");
+                    }
+                    else
+                    {
+                        transform.localScale = new Vector3(1, 1, 1);
+
+                        rbAraña.velocity = new Vector2(velocidad * -1, rbAraña.velocity.y);
+                    }
+
+                }
+            }
+
+
+
+            yield return null;
+
+
+        }
+    }
     //que si esta debajo el player, la araña baje 
     void Bajar() 
     {
-        bool estaPlayer = Physics2D.Raycast(transform.position, -Vector2.up, distanciaRayo,player);  //mirar si el rayo sale para abajo o arriba
+        bool estaPlayer = Physics2D.Raycast(transform.position, Vector2.down, distanciaRayo,player);  //mirar si el rayo sale para abajo o arriba
 
         // si golpea algo
         if (estaPlayer)
         {
-            
+            StartCoroutine(itsGrounder());
             Voltear();
             rbAraña.gravityScale = 1;
-            
+            bajar = true;
         }
     }
 
+    IEnumerator itsGrounder()
+    {
+        while(rbAraña.velocity.y>=0 && bajar)
+        {
+            patrulla = false;
+            Collider2D call = Physics2D.OverlapCircle(transform.position, radio, suelo);
+            if (call)
+            {
+                bajar = false;
+            }
+            yield return null;
+        }
+
+    }
     void SeguirPlayer() 
     {
-        if (arañaEnSuelo) //si araña en el suelo
+        if (seguir) //si araña en el suelo
         {
-            position = transform.position;
-
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            posPlayer = player.GetComponent<Transform>();
-
             var acercamiento = velocidad * Time.deltaTime; // calculate distance to move
-            Vector2.MoveTowards(position, posPlayer.position, acercamiento);
+            transform.position=Vector2.MoveTowards(position, posPlayer.position, acercamiento);
         }
     }
 
-    private void OnTriggerEnter2D(Collider2D collision) //
-    {
-        if (collision.CompareTag("Suelo"))
-        {
-            arañaEnSuelo = true;
-        }
-        else
-        {
-            arañaEnSuelo = false;
-        }
-    }
+    
 }
 
 

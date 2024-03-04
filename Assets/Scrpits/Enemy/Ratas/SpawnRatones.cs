@@ -8,6 +8,7 @@ public class SpawnRatones : MonoBehaviour
     // VA EN el espacio de la camara
     // only sent if one of the colliders also has a rigidbody attached. (el trigger stay)
     //la corrutina se activa cuando  el rango de la camara esta en contacto con el spawn
+    Rigidbody2D rb;
     [SerializeField] GameObject prefabRats;
     Transform player;
     [SerializeField]int limtRats;
@@ -20,7 +21,6 @@ public class SpawnRatones : MonoBehaviour
     [SerializeField]float radio;
     [SerializeField] bool setArea;
 
-    
 
     //poner los spawns //PONER TAG A TODOS LOS SPAWNS
 
@@ -29,7 +29,7 @@ public class SpawnRatones : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-
+        rb = GetComponent<Rigidbody2D>();
         player = GameObject.FindWithTag("Player").GetComponent<Transform>();
 
         StartCoroutine(CorrutinaSalidaRatones());
@@ -42,6 +42,9 @@ public class SpawnRatones : MonoBehaviour
     {
         AreaDetect();
     }
+
+    
+
     void AreaDetect()
     {
         area.localScale = new Vector2(radio * 2, radio * 2);
@@ -72,6 +75,7 @@ public class SpawnRatones : MonoBehaviour
             libre = false;
         }
     }
+
     private void OnTriggerExit2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
@@ -79,6 +83,7 @@ public class SpawnRatones : MonoBehaviour
             libre = true;
         }
     }
+
     private void OnTriggerStay2D(Collider2D collision)
     {
         if (collision.gameObject.CompareTag("Player") || collision.gameObject.CompareTag("Enemy"))
@@ -86,6 +91,7 @@ public class SpawnRatones : MonoBehaviour
             libre = false;
         }
     }
+
     IEnumerator CorrutinaSalidaRatones()
     {
         while (true)
@@ -100,4 +106,5 @@ public class SpawnRatones : MonoBehaviour
         }
 
     }
+
 }
