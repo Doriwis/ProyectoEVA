@@ -4,60 +4,36 @@ using UnityEngine;
 
 public class SpawnBombas : MonoBehaviour
 {
+    [SerializeField]float dano;
+    Animator anim;
+    Rigidbody2D rb;
+
+    private void Start()
+    {
+        anim = GetComponent<Animator>();
+        rb=GetComponent<Rigidbody2D>();
+    }
     //va en el trigger del rango de las bombas
-    [SerializeField] GameObject prefabBombas;
-    bool estaEnRango = false;
-    Transform trSpawn;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        StartCoroutine(CorrutinaSoltarBombas());
-    }
-
-    // Update is called once per frame
-    void Update()
+    private void OnTriggerEnter2D(Collider2D collision)
     {
 
-    }
-
-    IEnumerator CorrutinaSoltarBombas()
-    {
-        while (true)
+        anim.SetTrigger("Dead");
+        rb.velocity = Vector2.zero;
+        rb.bodyType = RigidbodyType2D.Kinematic;
+        if (collision.gameObject.CompareTag("Player"))
         {
-            if (estaEnRango) //mirar si en el rango de la camara del player hay algun spawn
-            {
-                Instantiate(prefabBombas, trSpawn.position, Quaternion.identity); //poner la posicion de los spawns que devuelva el trigger stay
-                yield return new WaitForSeconds(3);
-                //Animacion explosion bomba
-                ExplosionBomba();
-            }
-            // yield return null;
+            collision.gameObject.GetComponent<Player>().RecibirDano(dano);
+        }
+        else if(collision.gameObject.CompareTag("Enemy"))
+        {
+            collision.gameObject.GetComponent<Enemy>().RecibirDano(dano);
         }
 
     }
-
-
-    void OnTriggerStay2D(Collider2D collision) //si el rango del player entra en contacto con este spawn
+    public void Destroy()
     {
-        if (collision.CompareTag("SpawnBombas"))
-        {
-            trSpawn = collision.GetComponent<Transform>();
-
-            estaEnRango = true;
-        }
-        else
-        {
-            estaEnRango = false;
-        }
+        Destroy(this.gameObject);
     }
-
-    void ExplosionBomba()
-    {
-        //animacion explosion bomba
-        
-    }
-
 }
 
 
