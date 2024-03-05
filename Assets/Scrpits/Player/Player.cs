@@ -61,7 +61,7 @@ public class Player : MonoBehaviour
     float anguloRot;
     public float longCad=6;
     [Header("Metal")]
-    [SerializeField]bool metal;
+    public bool metal;
 
     // AREA DE DETECCION
     // CADENA
