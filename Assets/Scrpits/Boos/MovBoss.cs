@@ -33,8 +33,8 @@ public class MovBoss : MonoBehaviour
     [SerializeField] Transform area;
 
     [Header("Volar")]
-    Transform spawnRayo;
-    GameObject goSpawnRayo;
+    [SerializeField]Transform spawnRayo;
+    [SerializeField]GameObject goSpawnRayo;
 
     [SerializeField] int aux;
     [SerializeField]float registro=1;
@@ -45,15 +45,10 @@ public class MovBoss : MonoBehaviour
     [SerializeField] Transform puntoC;
     [SerializeField] Transform puntoL;
 
-    Vector2 direccion;
-    [SerializeField] int tiempoRayoVolar;
-    [SerializeField] int dahnoRayo;
-    bool volar;// ver cuando se activa
-    [SerializeField] int pararVolar;
-
-    [SerializeField] GameObject prefabParteRayo;
-    [SerializeField] GameObject SpawnPrefabParteRayo; //va emparentado al spawn del rayo y se crea uno a la vez que se crea el trozo de rayo 
-    //es donde se va a spaunear el siguiente asi que tiene qu eestar mas debajo para q sea el ce
+    [SerializeField] Transform partillazo;
+    [SerializeField] float radioM;
+    [SerializeField] LayerMask playerMask;
+    [SerializeField] float FLDSMDFR;
 
 
     //ENGRANAJES
@@ -69,7 +64,7 @@ public class MovBoss : MonoBehaviour
     bool finTemporizador;
 
     [Header("ATAQUE BASTON")]
-
+    [SerializeField] bool mele;
     [SerializeField] float danomele1;
     [SerializeField] float danomele2;
     bool tpActivado;
@@ -105,6 +100,7 @@ public class MovBoss : MonoBehaviour
 
         rb = GetComponent<Rigidbody2D>();
         StartCoroutine(MovFase1());
+        StartCoroutine(AtacoBaston());
        
     }
 
@@ -115,10 +111,9 @@ public class MovBoss : MonoBehaviour
         {
             if (vida > 66) //vida a mas de 66% //rayo volar
             {
-                if (volar)
-                {
-                    Fase1(); 
-                }
+               
+                Fase1(); 
+                
 
             }
             else if (vida > 33) //vida a mas de 33% //baston
@@ -152,6 +147,7 @@ public class MovBoss : MonoBehaviour
 
 
         }
+       
     }
 
     void AtaqueBaston()
@@ -200,6 +196,7 @@ public class MovBoss : MonoBehaviour
     IEnumerator MovFase1()
     {
                 yield return new WaitForSeconds(3);
+         anim.SetTrigger("StartLaser");
         while (true)
         {
             if (misFases==Fases.faseRayo)
@@ -243,11 +240,15 @@ public class MovBoss : MonoBehaviour
                 }
                 else if (destinoAct==Destinos.abajo)
                 {
-                    Debug.LogWarning("ABAJO");
+                    
 
-                    if (transform.position.y <= puntoR.position.y)
+                    if (transform.position.y <= puntoC.position.y)
                     {
+                        Debug.LogWarning("Fin ABAJO");
+                        anim.SetBool("Volar", false);
+                        
                         yield return new WaitForSeconds(5);
+                        
                         CambioDestino();
                         Debug.LogWarning("ESTOY ABAJO");
                     }
@@ -317,6 +318,46 @@ public class MovBoss : MonoBehaviour
             yield return null;
         }
     }
+   public  void OverlabMartillazo()
+    {
+        Collider2D cesta = Physics2D.OverlapCircle(partillazo.position, radioM, playerMask);
+        if (cesta)
+        {
+            cesta.gameObject.GetComponent<Player>().RecibirDano(FLDSMDFR);
+        }
+    }
+    void OnDrawGizmos()
+    { //Detec duelo
+        Gizmos.DrawSphere(partillazo.position, radioM);
+
+
+    }
+    void SetVolarTrue()
+    {
+        Debug.LogError("volar true");
+        anim.SetBool("Volar", true);
+    }
+    IEnumerator AtacoBaston()
+    {
+        while (true)
+        {
+            if (mele)
+            {
+                if (AreaDetect())
+                {
+                    anim.SetTrigger("mele");
+                }
+                yield return new WaitForSeconds(3);
+            }
+            yield return null;
+        }
+    }
+    public  void LanzoRayo()
+    {
+        Debug.LogWarning("LANZO RAYO");
+        GameObject auxg=GameObject.Instantiate(goSpawnRayo, spawnRayo);
+        auxg.transform.position = spawnRayo.position;
+    }
     IEnumerator aquedireccion()
     {
         yield return null;
@@ -352,6 +393,7 @@ public class MovBoss : MonoBehaviour
         else if (destinoAct == Destinos.abajo)
         {
             destinoAct = Destinos.arriba;
+            anim.SetTrigger("StartLaser");
         }
         else if (destinoAct==Destinos.derecha|| destinoAct == Destinos.izquierda || destinoAct == Destinos.centro)
         {
@@ -461,35 +503,6 @@ public class MovBoss : MonoBehaviour
         }
         finTemporizador = true;
        // StartCoroutine(PararVolar());
-    }
-
-    private void OnTriggerStay2D(Collider2D collision) 
-    {
-        Collider2D plColl = player.GetComponent<Collider2D>();
-        if (collision = plColl)
-        {
-            playerTocado = true;
-        }
-        if (collision.CompareTag("PlayerEnRango"))
-        {
-            playerEnRango = true;
-            
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D collision) 
-    {
-       
-        if (collision.CompareTag("PlayerEnRango"))
-        {
-            playerEnRango = false;
-
-        }
-    }
-
-    public void RecibirDano(int dano)
-    {
-        vida =  -dano;
     }
 
     // para el baston poner en el baston o el boss - collider2D (is trigger)+ Riggid body (kinematic) + tag iman
